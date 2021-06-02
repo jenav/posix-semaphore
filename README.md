@@ -5,20 +5,39 @@
 ### Installation
 `npm install posix-semaphore`
 
-### Example
+### Example 1
 ```javascript
 const Semaphore = require('posix-semaphore')
 
 const sem = new Semaphore('mySemaphore')
 sem.acquire()
 
-/* my code using shared ressources 😎 */
+/* my code using shared resources 😎 */
 
 sem.release()
-// other processes are now free to use the ressources
+// other processes are now free to use the resources
 
 // remove the semaphore from the system
 sem.close()
+```
+### Example 2
+```javascript
+const Semaphore = require('posix-semaphore')
+
+const sem = new Semaphore('mySemaphore')
+try {
+  sem.tryAcquire()
+
+  /* my code using shared resources 😎 */
+
+  sem.release()
+  // other processes are now free to use the resources
+} catch (e) {
+  console.error(e)
+} finally {
+  // remove the semaphore from the system
+  sem.close()
+}
 ```
 
 ### Inter-process communication example
@@ -74,9 +93,10 @@ $
 
 #### `new Semaphore(semName, options)`
 
-Opens a new or an already existing semaphore with `sem_open`. Fails with an error if the semaphore could not be opened.
+Opens a new or an already existing semaphore with `sem_open`. Fails with an error if the semaphore could not be opened or acquired.
 - `semName` : name of the semaphore
 - `options` :
+  - `create` : If true, create the semaphore if it doesn't exist. Otherwise just try to open an already existing one. Default : true
   - `strict` : If set to false, `acquire`, `release` and `close` won't fail if the semaphore is already acquired/released/closed in the current process. Default : true
   - `closeOnExit` : If true, the semaphore will be closed on process exit (uncaughtException, SIGINT, normal exit). Default : true 
   - `debug` : Prints useful information. Default : false
@@ -87,6 +107,10 @@ Opens a new or an already existing semaphore with `sem_open`. Fails with an erro
 #### `sem.acquire()`
 
 The call will block until the semaphore is acquired by the process (will happen instantly if no other process acquired the lock). Calls `sem_wait` under the hood.
+
+#### `sem.tryAcquire()`
+
+The call will not block if the semaphore can't be acquired by the process. Calls `sem_trywait` under the hood.
 
 #### `sem.release()`
 
