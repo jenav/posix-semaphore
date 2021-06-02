@@ -50,6 +50,7 @@ void Semaphore::Init(v8::Local<v8::Object> exports)
 
   // Prototype
   Nan::SetPrototypeMethod(tpl, "acquire", Acquire);
+  Nan::SetPrototypeMethod(tpl, "tryAcquire", TryAcquire);
   Nan::SetPrototypeMethod(tpl, "release", Release);
   Nan::SetPrototypeMethod(tpl, "close", Close);
 
