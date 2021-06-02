@@ -149,6 +149,26 @@ void Semaphore::Acquire(const Nan::FunctionCallbackInfo<v8::Value>& info)
   obj->locked = true;
 }
 
+void Semaphore::TryAcquire(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+  Semaphore* obj = ObjectWrap::Unwrap<Semaphore>(info.Holder());
+
+  if (obj->strict && obj->closed)
+    return Nan::ThrowError("trying to do operation over semaphore, but already closed");
+  if (obj->strict && obj->locked)
+    return Nan::ThrowError("trying to acquire semaphore, but already acquired");
+  // let's try!
+  if (sem_trywait(obj->semaphore) == -1)
+  {
+    if (obj->debug || !obj->silent)
+    {
+      printf("[posix-semaphore] could not acquire semaphore, sem_trywait failed");
+    }
+    return Nan::ThrowError("could not acquire semaphore, sem_trywait failed");
+  }
+  obj->locked = true;
+}
+
 void Semaphore::Release(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
   Semaphore* obj = ObjectWrap::Unwrap<Semaphore>(info.Holder());
