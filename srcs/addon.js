@@ -7,6 +7,9 @@ function parseOptions (options) {
   if (typeof options !== 'object') {
     options = {}
   }
+  if (!(options.create === false)) {
+    options.create = true
+  }
   if (!(options.strict === false)) {
     options.strict = true
   }
@@ -74,7 +77,7 @@ function Semaphore(name, options) {
   semaphoreNames[name] = 1
   this.name = name
   options = parseOptions(options)
-  this.sem = new SemaphoreCPP(name, options.strict, options.debug, options.silent, options.retryOnEintr, options.value)
+  this.sem = new SemaphoreCPP(name, options.create, options.strict, options.debug, options.silent, options.retryOnEintr, options.value)
   if (options.closeOnExit === undefined || options.closeOnExit) {
     const onExit = () => {
       if (this.closed !== true) {
