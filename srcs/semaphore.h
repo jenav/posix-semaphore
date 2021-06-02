@@ -17,6 +17,7 @@ class Semaphore : public Nan::ObjectWrap {
 
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void Acquire(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void TryAcquire(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void Release(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void Close(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
