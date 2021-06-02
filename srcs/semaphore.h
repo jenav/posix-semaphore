@@ -25,7 +25,6 @@ class Semaphore : public Nan::ObjectWrap {
   char	sem_name[SEMSIZE];
   bool	locked;
   bool	closed;
-  bool	create;
   bool strict;
   bool debug;
   bool silent;
