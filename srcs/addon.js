@@ -63,6 +63,10 @@ function Semaphore(name, options) {
   this.acquire = () => {
     this.sem.acquire()
   }
+  
+  this.tryAcquire = () => {
+    this.sem.tryAcquire()
+  }
 
   this.release = () => {
     this.sem.release()
