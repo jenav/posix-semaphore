@@ -3,15 +3,28 @@
 
 Nan::Persistent<v8::Function> Semaphore::constructor;
 
-Semaphore::Semaphore(char buf[], size_t buf_len, bool strict, bool debug, bool silent, bool retry_on_eintr, unsigned int value /*= 1*/)
+Semaphore::Semaphore(char buf[], size_t buf_len, bool create, bool strict, bool debug, bool silent, bool retry_on_eintr, unsigned int value /*= 1*/)
 {
   strcpy(this->sem_name, buf);
-  this->semaphore = sem_open(this->sem_name, O_CREAT, 0644, value);
-  if (this->semaphore == SEM_FAILED)
+  if (create)
   {
-    this->closed = 1;
-    Nan::ThrowError("Could not create semaphore: sem_open failed");
-    return ;
+    this->semaphore = sem_open(this->sem_name, O_CREAT, 0644, value);
+    if (this->semaphore == SEM_FAILED)
+    {
+      this->closed = 1;
+      Nan::ThrowError("Could not create semaphore: sem_open failed");
+      return ;
+    }
+  }
+  else
+  {
+    this->semaphore = sem_open(this->sem_name, 0);
+    if (this->semaphore == SEM_FAILED)
+    {
+      this->closed = 1;
+      Nan::ThrowError("Could not open semaphore: sem_open failed");
+      return ;
+    }
   }
   this->locked = false;
   this->closed = false;
@@ -52,6 +65,7 @@ void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  bool create;
   bool strict;
   bool debug;
   bool silent;
@@ -61,8 +75,8 @@ void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
   if (!info.IsConstructCall())
     return Nan::ThrowError("Must call Semaphore() with new");
-  if ((info.Length() < 5) || (info.Length() > 6))
-    return Nan::ThrowError("Semaphore() expects 5 or 6 arguments");
+  if ((info.Length() < 6) || (info.Length() > 7))
+    return Nan::ThrowError("Semaphore() expects 6 or 7 arguments");
   if (!info[0]->IsString())
     return Nan::ThrowError("Semaphore() expects a string as first argument");
   if (!info[1]->IsBoolean())
@@ -73,13 +87,16 @@ void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
     return Nan::ThrowError("Semaphore() expects a boolean as fourth argument");
   if (!info[4]->IsBoolean())
     return Nan::ThrowError("Semaphore() expects a boolean as fifth argument");
-  if (!info[5]->IsUndefined() && !info[5]->IsUint32())
-    return Nan::ThrowError("Semaphore() expects an integer as sixth argument");
+  if (!info[5]->IsBoolean())
+    return Nan::ThrowError("Semaphore() expects a boolean as sixth argument");
+  if (!info[6]->IsUndefined() && !info[5]->IsUint32())
+    return Nan::ThrowError("Semaphore() expects an integer as seventh argument");
   strict = Nan::To<bool>(info[1]).FromJust();
-  debug = Nan::To<bool>(info[2]).FromJust();
-  silent = Nan::To<bool>(info[3]).FromJust();
-  retry_on_eintr = Nan::To<bool>(info[4]).FromJust();
-  value = !info[5]->IsUndefined()? info[5]->IntegerValue(context).FromJust(): 1;
+  strict = Nan::To<bool>(info[2]).FromJust();
+  debug = Nan::To<bool>(info[3]).FromJust();
+  silent = Nan::To<bool>(info[4]).FromJust();
+  retry_on_eintr = Nan::To<bool>(info[5]).FromJust();
+  value = !info[6]->IsUndefined()? info[6]->IntegerValue(context).FromJust(): 1;
   v8::String::Utf8Value v8str(isolate, info[0]);
   std::string str(*v8str);
 
@@ -91,7 +108,7 @@ void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
   if (str_len >= SEMSIZE - 1 || str_len <= 0)
     return Nan::ThrowError("Semaphore() : first argument's length must be < 255 && > 0");
 
-  Semaphore* obj = new Semaphore(buf, str_len, strict, debug, silent, retry_on_eintr, value);
+  Semaphore* obj = new Semaphore(buf, str_len, create, strict, debug, silent, retry_on_eintr, value);
   obj->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
