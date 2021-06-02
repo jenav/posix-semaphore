@@ -91,7 +91,7 @@ void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
     return Nan::ThrowError("Semaphore() expects a boolean as sixth argument");
   if (!info[6]->IsUndefined() && !info[5]->IsUint32())
     return Nan::ThrowError("Semaphore() expects an integer as seventh argument");
-  strict = Nan::To<bool>(info[1]).FromJust();
+  create = Nan::To<bool>(info[1]).FromJust();
   strict = Nan::To<bool>(info[2]).FromJust();
   debug = Nan::To<bool>(info[3]).FromJust();
   silent = Nan::To<bool>(info[4]).FromJust();
