@@ -10,9 +10,6 @@ function parseOptions (options) {
   if (!(options.create === false)) {
     options.create = true
   }
-  if (!(options.strict === false)) {
-    options.strict = true
-  }
   if (!options.debug) {
     options.debug = false
   } else {
@@ -55,28 +52,32 @@ function Semaphore(name, options) {
     throw new Error(`Semaphore "${name}" already open in this process`)
   }
 
-  this.acquire = () => {
-    this.sem.acquire()
+  this.wait = () => {
+    this.sem.wait()
   }
   
-  this.tryAcquire = () => {
-    this.sem.tryAcquire()
+  this.tryWait = () => {
+    this.sem.tryWait()
   }
 
-  this.release = () => {
-    this.sem.release()
+  this.post = () => {
+    this.sem.post()
   }
 
   this.close = () => {
     this.sem.close()
-    delete semaphoreNames[name]
     this.closed = true
+  }
+  
+  this.unlink = () => {
+    this.sem.unlink()
+    delete semaphoreNames[name]
   }
 
   semaphoreNames[name] = 1
   this.name = name
   options = parseOptions(options)
-  this.sem = new SemaphoreCPP(name, options.create, options.strict, options.debug, options.retryOnEintr, options.value)
+  this.sem = new SemaphoreCPP(name, options.create, options.debug, options.retryOnEintr, options.value)
   if (options.closeOnExit === undefined || options.closeOnExit) {
     const onExit = () => {
       if (this.closed !== true) {
@@ -84,6 +85,7 @@ function Semaphore(name, options) {
           console.log(`[posix-semaphore] Exiting, closing semaphore "${this.name}"... (to prevent this behavior, set the \'closeOnExit\' option to false)`)
         }
         this.close()
+        this.unlink()
         if (options.debug) {
           console.log('[posix-semaphore] done.')
         }
