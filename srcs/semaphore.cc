@@ -50,7 +50,6 @@ void Semaphore::Init(v8::Local<v8::Object> exports)
   Nan::SetPrototypeMethod(tpl, "tryWait", TryWait);
   Nan::SetPrototypeMethod(tpl, "post", Post);
   Nan::SetPrototypeMethod(tpl, "close", Close);
-  Nan::SetPrototypeMethod(tpl, "unlink", Unlink);
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
   exports->Set(
@@ -194,32 +193,7 @@ void Semaphore::Close(const Nan::FunctionCallbackInfo<v8::Value>& info)
   if (obj->debug)
     printf("[posix-semaphore] Closing semaphore\n");
   
-  if (sem_close(obj->semaphore) == -1)
-  {
-    if (obj->debug)
-    {
-      printf("[posix-semaphore] sem_close failed, printing errno message ('man sem_close' for more details on possible errors): \n");
-      perror("[posix-semaphore] ");
-    }
-    return Nan::ThrowError("could not close semaphore, sem_close failed");
-  }
   obj->closed = true;
-}
-
-void Semaphore::Unlink(const Nan::FunctionCallbackInfo<v8::Value>& info)
-{
-  Semaphore* obj = ObjectWrap::Unwrap<Semaphore>(info.Holder());
-  
-  if (obj->debug)
-    printf("[posix-semaphore] Unlinking semaphore\n");
-
-  if (sem_unlink(obj->sem_name) == -1)
-  {
-    if (obj->debug)
-    {
-      printf("[posix-semaphore] sem_unlink failed, printing errno message ('man sem_unlink' for more details on possible errors): \n");
-      perror("[posix-semaphore] ");
-    }
-    return Nan::ThrowError("could not unlink semaphore, sem_unlink failed");
-  }
+  sem_close(obj->semaphore);
+  sem_unlink(obj->sem_name);
 }

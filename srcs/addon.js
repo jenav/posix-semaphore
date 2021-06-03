@@ -69,10 +69,6 @@ function Semaphore(name, options) {
     delete semaphoreNames[name]
     this.closed = true
   }
-  
-  this.unlink = () => {
-    this.sem.unlink()  
-  }
 
   semaphoreNames[name] = 1
   this.name = name
@@ -85,7 +81,6 @@ function Semaphore(name, options) {
           console.log(`[posix-semaphore] Exiting, closing semaphore "${this.name}"... (to prevent this behavior, set the \'closeOnExit\' option to false)`)
         }
         this.close()
-        this.unlink()
         if (options.debug) {
           console.log('[posix-semaphore] done.')
         }

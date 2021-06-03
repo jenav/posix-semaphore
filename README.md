@@ -17,11 +17,8 @@ sem.wait()
 sem.post()
 // other processes are now free to use the resources
 
-// close the semaphore for the process
-sem.close()
-
 // remove the semaphore from the system
-sem.unlink()
+sem.close()
 ```
 ### Example 2
 ```javascript
@@ -40,7 +37,6 @@ try {
 } finally {
   // close and remove the semaphore from the system
   sem.close()
-  sem.unlink()
 }
 ```
 
@@ -120,8 +116,4 @@ Releases the semaphore if it had been acquired, allowing other processes to acqu
 
 #### `sem.close()`
 
-Closes semaphore, meaning that the current processe will no longer have access to it. Calls `sem_close` under the hood.
-
-#### `sem.unlink()`
-
-Unlinks the semaphore, meaning that other processes will no longer have access to it. Calls `sem_unlink` under the hood.
+Closes and unlinks the semaphore, meaning that other processes will no longer have access to it. Calls `sem_close` and `sem_unlink` under the hood.
