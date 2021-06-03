@@ -66,12 +66,12 @@ function Semaphore(name, options) {
 
   this.close = () => {
     this.sem.close()
+    delete semaphoreNames[name]
     this.closed = true
   }
   
   this.unlink = () => {
-    this.sem.unlink()
-    delete semaphoreNames[name]
+    this.sem.unlink()  
   }
 
   semaphoreNames[name] = 1
