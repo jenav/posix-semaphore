@@ -12,7 +12,7 @@ class Semaphore : public Nan::ObjectWrap {
   static void Init(v8::Local<v8::Object> exports);
 
  private:
-  explicit Semaphore(char *buf, size_t buf_len, bool create, bool debug, bool retry_on_eintr, unsigned int value = 1);
+  explicit Semaphore(char *buf, bool create, char *mask, bool debug, bool retry_on_eintr, unsigned int value = 1);
   ~Semaphore();
 
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
