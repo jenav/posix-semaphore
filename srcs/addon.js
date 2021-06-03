@@ -18,11 +18,6 @@ function parseOptions (options) {
   } else {
     options.debug = true
   }
-  if (!options.silent) {
-    options.silent = false
-  } else {
-    options.silent = true
-  }
   if (!(options.retryOnEintr === true)) {
     options.retryOnEintr = false
   }
@@ -38,7 +33,7 @@ function registerExitHandler (options, onExit) {
   process.on('exit', onExit)
   process.on('uncaughtException', (err) => {
     console.error(err.stack)
-    if (!options.silent || options.debug) {
+    if (options.debug) {
       console.log('[posix-semaphore] Catched uncaughtException, closing semaphore if necessary...')
     }
     setTimeout(() => { process.exit(1) }, 4000)
@@ -81,15 +76,15 @@ function Semaphore(name, options) {
   semaphoreNames[name] = 1
   this.name = name
   options = parseOptions(options)
-  this.sem = new SemaphoreCPP(name, options.create, options.strict, options.debug, options.silent, options.retryOnEintr, options.value)
+  this.sem = new SemaphoreCPP(name, options.create, options.strict, options.debug, options.retryOnEintr, options.value)
   if (options.closeOnExit === undefined || options.closeOnExit) {
     const onExit = () => {
       if (this.closed !== true) {
-        if (!options.silent || options.debug) {
+        if (options.debug) {
           console.log(`[posix-semaphore] Exiting, closing semaphore "${this.name}"... (to prevent this behavior, set the \'closeOnExit\' option to false)`)
         }
         this.close()
-        if (!options.silent || options.debug) {
+        if (options.debug) {
           console.log('[posix-semaphore] done.')
         }
       }
