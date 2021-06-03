@@ -12,21 +12,20 @@ class Semaphore : public Nan::ObjectWrap {
   static void Init(v8::Local<v8::Object> exports);
 
  private:
-  explicit Semaphore(char *buf, size_t buf_len, bool create, bool strict, bool debug, bool retry_on_eintr, unsigned int value = 1);
+  explicit Semaphore(char *buf, size_t buf_len, bool create, bool debug, bool retry_on_eintr, unsigned int value = 1);
   ~Semaphore();
 
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Acquire(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void TryAcquire(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Release(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void Wait(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void TryWait(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void Post(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void Close(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void Unlink(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
 
   sem_t	*semaphore;
   char	sem_name[SEMSIZE];
-  bool	locked;
   bool	closed;
-  bool strict;
   bool debug;
   bool retry_on_eintr;
 };

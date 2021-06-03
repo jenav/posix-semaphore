@@ -10,15 +10,18 @@
 const Semaphore = require('posix-semaphore')
 
 const sem = new Semaphore('mySemaphore')
-sem.acquire()
+sem.wait()
 
 /* my code using shared resources 😎 */
 
-sem.release()
+sem.post()
 // other processes are now free to use the resources
 
-// remove the semaphore from the system
+// close the semaphore for the process
 sem.close()
+
+// remove the semaphore from the system
+sem.unlink()
 ```
 ### Example 2
 ```javascript
@@ -26,17 +29,18 @@ const Semaphore = require('posix-semaphore')
 
 const sem = new Semaphore('mySemaphore')
 try {
-  sem.tryAcquire()
+  sem.tryWait()
 
   /* my code using shared resources 😎 */
 
-  sem.release()
+  sem.post()
   // other processes are now free to use the resources
 } catch (e) {
   console.error(e)
 } finally {
-  // remove the semaphore from the system
+  // close and remove the semaphore from the system
   sem.close()
+  sem.unlink()
 }
 ```
 
@@ -50,7 +54,7 @@ function parentProcess () {
   const semParent = new Semaphore('mySemaphore', { debug: true })
   const bufParent = shm.create(4096)
   // we get the lock
-  semParent.acquire()
+  semParent.wait()
 
   // we create the child process
   const child = cluster.fork({ SHM_KEY: bufParent.key })
@@ -58,7 +62,7 @@ function parentProcess () {
   // we write some data to the shared memory segment
   bufParent.write('hi there :)')
   // we release the lock
-  semParent.release()
+  semParent.post()
 
   // we close the child after a second
   setTimeout(() => { child.kill('SIGINT') }, 1000)
@@ -70,7 +74,7 @@ function childProcess () {
   const bufChild = shm.get(shmKey)
   
   // we get the lock, will block until the parent has released
-  semChild.acquire()
+  semChild.wait()
   // should print 'hi there :)'
   console.log(bufChild.toString())
 }
@@ -97,24 +101,27 @@ Opens a new or an already existing semaphore with `sem_open`. Fails with an erro
 - `semName` : name of the semaphore
 - `options` :
   - `create` : If true, create the semaphore if it doesn't exist. Otherwise just try to open an already existing one. Default : true
-  - `strict` : If set to false, `acquire`, `release` and `close` won't fail if the semaphore is already acquired/released/closed in the current process. Default : true
-  - `closeOnExit` : If true, the semaphore will be closed on process exit (uncaughtException, SIGINT, normal exit). Default : true 
-  - `debug` : Prints useful information. Default : false
   - `retryOnEintr` : If `sem_wait` fails with `EINTR` (usually it's due to a SIGINT signal being fired on CTRL-C), try to acquire the lock again. Default : false
   - `value` : Initial value of semaphore. Default : 1
+  - `debug` : Prints useful information. Default : false
+  - `closeOnExit` : If true, the semaphore will be closed on process exit (uncaughtException, SIGINT, normal exit). Default : true 
 
-#### `sem.acquire()`
+#### `sem.wait()`
 
 The call will block until the semaphore is acquired by the process (will happen instantly if no other process acquired the lock). Calls `sem_wait` under the hood.
 
-#### `sem.tryAcquire()`
+#### `sem.tryWait()`
 
 The call will not block if the semaphore can't be acquired by the process. Calls `sem_trywait` under the hood.
 
-#### `sem.release()`
+#### `sem.post()`
 
 Releases the semaphore if it had been acquired, allowing other processes to acquire the lock. Calls `sem_post` under the hood.
 
 #### `sem.close()`
 
-Closes and unlinks the semaphore, meaning that other processes will no longer have access to it. Calls `sem_close` and `sem_unlink` under the hood.
+Closes semaphore, meaning that the current processe will no longer have access to it. Calls `sem_close` under the hood.
+
+#### `sem.unlink()`
+
+Unlinks the semaphore, meaning that other processes will no longer have access to it. Calls `sem_unlink` under the hood.
