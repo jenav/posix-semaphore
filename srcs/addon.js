@@ -10,6 +10,9 @@ function parseOptions (options) {
   if (!(options.create === false)) {
     options.create = true
   }
+  if (typeof options.mask === 'undefined' || typeof options.mask !== 'string') {
+    options.mask = "0644";
+  }
   if (!options.debug) {
     options.debug = false
   } else {
@@ -73,7 +76,7 @@ function Semaphore(name, options) {
   semaphoreNames[name] = 1
   this.name = name
   options = parseOptions(options)
-  this.sem = new SemaphoreCPP(name, options.create, options.debug, options.retryOnEintr, options.value)
+  this.sem = new SemaphoreCPP(name, options.create, options.mask, options.debug, options.retryOnEintr, options.value)
   if (options.closeOnExit === undefined || options.closeOnExit) {
     const onExit = () => {
       if (this.closed !== true) {
