@@ -47,7 +47,7 @@ const Semaphore = require('posix-semaphore')
 const shm = require('shm-typed-array')
 
 function parentProcess () {
-  const semParent = new Semaphore('mySemaphore', { silent: true })
+  const semParent = new Semaphore('mySemaphore', { debug: true })
   const bufParent = shm.create(4096)
   // we get the lock
   semParent.acquire()
@@ -65,7 +65,7 @@ function parentProcess () {
 }
 
 function childProcess () {
-  const semChild = new Semaphore('mySemaphore', { silent: true })
+  const semChild = new Semaphore('mySemaphore', { debug: true })
   const shmKey = parseInt(process.env.SHM_KEY)
   const bufChild = shm.get(shmKey)
   
