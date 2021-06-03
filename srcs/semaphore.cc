@@ -12,8 +12,7 @@ Semaphore::Semaphore(char buf[], size_t buf_len, bool create, bool strict, bool 
     if (this->semaphore == SEM_FAILED)
     {
       this->closed = 1;
-      Nan::ThrowError("Could not create semaphore: sem_open failed");
-      return ;
+      return Nan::ThrowError("Could not create semaphore: sem_open failed");
     }
   }
   else
@@ -22,8 +21,7 @@ Semaphore::Semaphore(char buf[], size_t buf_len, bool create, bool strict, bool 
     if (this->semaphore == SEM_FAILED)
     {
       this->closed = 1;
-      Nan::ThrowError("Could not open semaphore: sem_open failed");
-      return ;
+      return Nan::ThrowError("Could not open semaphore: sem_open failed");
     }
   }
   this->locked = false;
@@ -144,8 +142,7 @@ void Semaphore::Acquire(const Nan::FunctionCallbackInfo<v8::Value>& info)
       }
     }
     if (errno != EINTR)
-      Nan::ThrowError("could not acquire semaphore, sem_wait failed");
-    return ;
+      return Nan::ThrowError("could not acquire semaphore, sem_wait failed");
   }
   obj->locked = true;
 }
