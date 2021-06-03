@@ -17,7 +17,7 @@ sem.wait()
 sem.post()
 // other processes are now free to use the resources
 
-// close the semaphore from the system
+// close the semaphore for the process
 sem.close()
 
 // remove the semaphore from the system
