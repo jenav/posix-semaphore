@@ -47,7 +47,7 @@ void Semaphore::Init(v8::Local<v8::Object> exports)
 
   // Prototype
   Nan::SetPrototypeMethod(tpl, "wait", Wait);
-  Nan::SetPrototypeMethod(tpl, "trywait", TryWait);
+  Nan::SetPrototypeMethod(tpl, "tryWait", TryWait);
   Nan::SetPrototypeMethod(tpl, "post", Post);
   Nan::SetPrototypeMethod(tpl, "close", Close);
   Nan::SetPrototypeMethod(tpl, "unlink", Unlink);
