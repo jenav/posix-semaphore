@@ -3,12 +3,13 @@
 
 Nan::Persistent<v8::Function> Semaphore::constructor;
 
-Semaphore::Semaphore(char buf[], size_t buf_len, bool create, bool debug, bool retry_on_eintr, unsigned int value /*= 1*/)
+Semaphore::Semaphore(char buf[], bool create, char mask[], bool debug, bool retry_on_eintr, unsigned int value /*= 1*/)
 {
   strcpy(this->sem_name, buf);
   if (create)
   {
-    this->semaphore = sem_open(this->sem_name, O_CREAT, 0644, value);
+    unsigned int bit_mask = strtol(mask, NULL, 8);
+    this->semaphore = sem_open(this->sem_name, O_CREAT, bit_mask, value);
     if (this->semaphore == SEM_FAILED)
     {
       this->closed = 1;
@@ -67,39 +68,53 @@ void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
   bool debug;
   bool retry_on_eintr;
   char buf[SEMSIZE];
+  char mask[5];
   unsigned int value;
 
   if (!info.IsConstructCall())
     return Nan::ThrowError("Must call Semaphore() with new");
-  if ((info.Length() < 4) || (info.Length() > 5))
+  if ((info.Length() < 5) || (info.Length() > 6))
     return Nan::ThrowError("Semaphore() expects 4 or 5 arguments");
-  if (!info[0]->IsString())
+  if (!info[0]->IsString())   // name 
     return Nan::ThrowError("Semaphore() expects a string as first argument");
-  if (!info[1]->IsBoolean())
+  if (!info[1]->IsBoolean())  // create
     return Nan::ThrowError("Semaphore() expects a boolean as second argument");
-  if (!info[2]->IsBoolean())
-    return Nan::ThrowError("Semaphore() expects a boolean as third argument");
-  if (!info[3]->IsBoolean())
+  if (!info[2]->IsString())   // bit mask
+    return Nan::ThrowError("Semaphore() expects a string as third argument");
+  if (!info[3]->IsBoolean())  // debug
     return Nan::ThrowError("Semaphore() expects a boolean as fourth argument");
-  if (!info[4]->IsUndefined() && !info[4]->IsUint32())
-    return Nan::ThrowError("Semaphore() expects an integer as fifth argument");
+  if (!info[4]->IsBoolean())  // retry_on_eintr
+    return Nan::ThrowError("Semaphore() expects a boolean as fifth argument");
+  if (!info[5]->IsUndefined() && !info[5]->IsUint32())  // value
+    return Nan::ThrowError("Semaphore() expects an integer as sixth argument");
   
   create = Nan::To<bool>(info[1]).FromJust();
-  debug = Nan::To<bool>(info[2]).FromJust();
-  retry_on_eintr = Nan::To<bool>(info[3]).FromJust();
-  value = !info[4]->IsUndefined()? info[4]->IntegerValue(context).FromJust(): 1;
+  debug = Nan::To<bool>(info[3]).FromJust();
+  retry_on_eintr = Nan::To<bool>(info[4]).FromJust();
+  value = !info[5]->IsUndefined()? info[5]->IntegerValue(context).FromJust(): 1;
+  
+  size_t str_len;
+  // sem name
   v8::String::Utf8Value v8str(isolate, info[0]);
   std::string str(*v8str);
-
-  size_t str_len;
   str_len = str.length();
-  strncpy(buf, str.c_str(), str_len);
-  buf[str_len] = '\0';
-
   if (str_len >= SEMSIZE - 1 || str_len <= 0)
     return Nan::ThrowError("Semaphore() : first argument's length must be < 255 && > 0");
+  
+  strncpy(buf, str.c_str(), str_len);
+  buf[str_len] = '\0';
+  
+  // bit mask
+  v8::String::Utf8Value v8str_mask(isolate, info[2]);
+  std::string str_mask(*v8str_mask);
+  str_len = str_mask.length();
+  if (str_len > 4 || str_len <= 0)
+    return Nan::ThrowError("Semaphore() : third argument's length must be <= 4 && > 0, ie: 0644 or 644");
+  
+  strncpy(mask, str_mask.c_str(), str_len);
+  mask[str_len] = '\0';
 
-  Semaphore* obj = new Semaphore(buf, str_len, create, debug, retry_on_eintr, value);
+  Semaphore* obj = new Semaphore(buf, create, mask, debug, retry_on_eintr, value);
   obj->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
