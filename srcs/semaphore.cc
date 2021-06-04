@@ -51,7 +51,6 @@ void Semaphore::Init(v8::Local<v8::Object> exports)
   Nan::SetPrototypeMethod(tpl, "tryWait", TryWait);
   Nan::SetPrototypeMethod(tpl, "post", Post);
   Nan::SetPrototypeMethod(tpl, "close", Close);
-  Nan::SetPrototypeMethod(tpl, "getValue", GetValue);
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
   exports->Set(
@@ -212,27 +211,4 @@ void Semaphore::Close(const Nan::FunctionCallbackInfo<v8::Value>& info)
   obj->closed = true;
   sem_close(obj->semaphore);
   sem_unlink(obj->sem_name);
-}
-
-int Semaphore::GetValue(const Nan::FunctionCallbackInfo<v8::Value>& info)
-{
-  Semaphore* obj = ObjectWrap::Unwrap<Semaphore>(info.Holder());
-
-  if (obj->closed)
-    return Nan::ThrowError("trying to do operation over semaphore, but already closed");
-  
-  if (obj->debug)
-    printf("[posix-semaphore] Getting semaphore value\n");
-  
-  int value;
-  if (sem_getvalue(obj->semaphore, &value) == -1)
-  {
-    if (obj->debug)
-    {
-      printf("[posix-semaphore] sem_post failed, printing errno message ('man sem_post' for more details on possible errors): \n");
-      perror("[posix-semaphore] ");
-    }
-    return Nan::ThrowError("could not read semaphore value, sem_getvalue failed");
-  }  
-  return value;  
 }
