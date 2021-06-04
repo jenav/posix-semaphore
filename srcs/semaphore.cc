@@ -57,7 +57,7 @@ void Semaphore::Init(v8::Local<v8::Object> exports)
     context,
     Nan::New("Semaphore").ToLocalChecked(),
     tpl->GetFunction(context).ToLocalChecked()
-  );
+  ).FromJust();
 }
 
 void Semaphore::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
