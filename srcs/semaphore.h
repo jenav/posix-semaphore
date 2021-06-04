@@ -20,7 +20,6 @@ class Semaphore : public Nan::ObjectWrap {
   static void TryWait(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void Post(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void Close(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static int GetValue(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
 
   sem_t	*semaphore;
