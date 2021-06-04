@@ -46,6 +46,8 @@ function registerExitHandler (options, onExit) {
 function Semaphore(name, options) {
   if (!(this instanceof Semaphore)) {
     return new Semaphore(name, options)
+  } else {
+    return this
   }
 
   if (typeof name !== 'string') {
@@ -79,7 +81,7 @@ function Semaphore(name, options) {
   this.name = name
   options = parseOptions(options)
   this.sem = new SemaphoreCPP(name, options.create, options.mask, options.debug, options.retryOnEintr, options.value)
-  semaphoreInstances[name] = this.sem
+  semaphoreInstances[name] = this
   if (options.closeOnExit === undefined || options.closeOnExit) {
     const onExit = () => {
       if (this.closed !== true) {
