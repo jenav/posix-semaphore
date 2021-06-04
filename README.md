@@ -5,6 +5,38 @@
 ### Installation
 `npm install posix-semaphore`
 
+### API
+
+#### `new Semaphore(semName, options)`
+
+Opens a new or an already existing semaphore with `sem_open`. Fails with an error if the semaphore could not be opened or acquired.
+- `semName` : name of the semaphore
+- `options` :
+  - `create` : If true, create the semaphore if it doesn't exist. Otherwise just try to open an already existing one. Default : true
+  - `mask` : Bit mask string to be used on semaphore creation (it's affected by the user umask). Default : "0644". Example : "600".
+  - `value` : Initial value of semaphore. Default : 1
+  - `retryOnEintr` : If `sem_wait` fails with `EINTR` (usually it's due to a SIGINT signal being fired on CTRL-C), try to acquire the lock again. Default : false
+  - `debug` : Prints useful information. Default : false
+  - `closeOnExit` : If true, the semaphore will be closed on process exit (uncaughtException, SIGINT, normal exit). Default : true 
+
+#### `sem.wait()`
+
+The call will block until the semaphore is acquired by the process (will happen instantly if no other process acquired the lock). Calls `sem_wait` under the hood.
+
+#### `sem.tryWait()`
+
+The call will not block if the semaphore can't be acquired by the process. Calls `sem_trywait` under the hood.
+
+#### `sem.post()`
+
+Releases the semaphore if it had been acquired, allowing other processes to acquire the lock. Calls `sem_post` under the hood.
+
+#### `sem.close()`
+
+Closes and unlinks the semaphore, meaning that other processes will no longer have access to it. Calls `sem_close` and `sem_unlink` under the hood.
+
+---
+
 ### Example 1
 ```javascript
 const Semaphore = require('posix-semaphore')
@@ -88,32 +120,3 @@ hi there :)
 shm segments destroyed: 1
 $
 ```
-
-### API
-
-#### `new Semaphore(semName, options)`
-
-Opens a new or an already existing semaphore with `sem_open`. Fails with an error if the semaphore could not be opened or acquired.
-- `semName` : name of the semaphore
-- `options` :
-  - `create` : If true, create the semaphore if it doesn't exist. Otherwise just try to open an already existing one. Default : true
-  - `retryOnEintr` : If `sem_wait` fails with `EINTR` (usually it's due to a SIGINT signal being fired on CTRL-C), try to acquire the lock again. Default : false
-  - `value` : Initial value of semaphore. Default : 1
-  - `debug` : Prints useful information. Default : false
-  - `closeOnExit` : If true, the semaphore will be closed on process exit (uncaughtException, SIGINT, normal exit). Default : true 
-
-#### `sem.wait()`
-
-The call will block until the semaphore is acquired by the process (will happen instantly if no other process acquired the lock). Calls `sem_wait` under the hood.
-
-#### `sem.tryWait()`
-
-The call will not block if the semaphore can't be acquired by the process. Calls `sem_trywait` under the hood.
-
-#### `sem.post()`
-
-Releases the semaphore if it had been acquired, allowing other processes to acquire the lock. Calls `sem_post` under the hood.
-
-#### `sem.close()`
-
-Closes and unlinks the semaphore, meaning that other processes will no longer have access to it. Calls `sem_close` and `sem_unlink` under the hood.
