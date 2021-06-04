@@ -47,7 +47,7 @@ function Semaphore(name, options) {
   if (!(this instanceof Semaphore)) {
     return new Semaphore(name, options)
   } else {
-    return this
+    return this.sem
   }
 
   if (typeof name !== 'string') {
