@@ -2,7 +2,7 @@
 
 const SemaphoreCPP = require('bindings')('addon').Semaphore
 const semaphoreNames = {}
-const semaphoreInstancse = {}
+const semaphoreInstances = {}
 
 function parseOptions (options) {
   if (typeof options !== 'object') {
