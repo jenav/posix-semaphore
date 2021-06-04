@@ -2,6 +2,7 @@
 
 const SemaphoreCPP = require('bindings')('addon').Semaphore
 const semaphoreNames = {}
+const semaphoreInstancse = {}
 
 function parseOptions (options) {
   if (typeof options !== 'object') {
@@ -52,7 +53,8 @@ function Semaphore(name, options) {
   }
 
   if (semaphoreNames[name] === 1) {
-    throw new Error(`Semaphore "${name}" already open in this process`)
+    return semaphoreInstances[name]
+    //throw new Error(`Semaphore "${name}" already open in this process`)
   }
 
   this.wait = () => {
@@ -77,6 +79,7 @@ function Semaphore(name, options) {
   this.name = name
   options = parseOptions(options)
   this.sem = new SemaphoreCPP(name, options.create, options.mask, options.debug, options.retryOnEintr, options.value)
+  semaphoreInstances[name] = this.sem
   if (options.closeOnExit === undefined || options.closeOnExit) {
     const onExit = () => {
       if (this.closed !== true) {
