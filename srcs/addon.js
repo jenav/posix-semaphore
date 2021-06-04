@@ -72,6 +72,10 @@ function Semaphore(name, options) {
     delete semaphoreNames[name]
     this.closed = true
   }
+  
+  this.getValue = () => {
+    this.sem.getValue()
+  }
 
   this.name = name
   options = parseOptions(options)
