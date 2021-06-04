@@ -51,7 +51,7 @@ void Semaphore::Init(v8::Local<v8::Object> exports)
   Nan::SetPrototypeMethod(tpl, "tryWait", TryWait);
   Nan::SetPrototypeMethod(tpl, "post", Post);
   Nan::SetPrototypeMethod(tpl, "close", Close);
-  Nan::SetPrototypeMethod(tpl, "getValue", GetClose);
+  Nan::SetPrototypeMethod(tpl, "getValue", GetValue);
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
   exports->Set(
