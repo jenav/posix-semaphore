@@ -210,5 +210,4 @@ void Semaphore::Close(const Nan::FunctionCallbackInfo<v8::Value>& info)
   
   obj->closed = true;
   sem_close(obj->semaphore);
-  sem_unlink(obj->sem_name);
 }
